@@ -283,6 +283,31 @@
             color: #006b35;
         }
 
+.filter-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 22px 0;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr auto;
+    gap: 14px;
+    align-items: end;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.filter-actions .btn {
+    white-space: nowrap;
+}
+
         @media (max-width: 800px) {
             .admin-wrapper {
                 flex-direction: column;
@@ -310,6 +335,13 @@
             table {
                 min-width: 760px;
             }
+            .filter-row {
+    grid-template-columns: 1fr;
+}
+
+.filter-actions {
+    flex-wrap: wrap;
+}
         }
     </style>
 </head>

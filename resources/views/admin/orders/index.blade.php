@@ -3,6 +3,17 @@
 @section('title', 'Admin Pesanan')
 
 @section('content')
+    @php
+        $statusLabels = [
+            'pending' => 'Pending',
+            'confirmed' => 'Dikonfirmasi',
+            'processing' => 'Diproses',
+            'delivering' => 'Diantar',
+            'completed' => 'Selesai',
+            'cancelled' => 'Dibatalkan',
+        ];
+    @endphp
+
     <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px;">
         <div>
             <h1>Admin Pesanan</h1>
@@ -10,9 +21,86 @@
         </div>
     </div>
 
-    @if($orders->count() === 0)
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Semua Pesanan</div>
+            <div class="stat-value">{{ $statusCounts['all'] }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Pending</div>
+            <div class="stat-value">{{ $statusCounts['pending'] }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Diproses</div>
+            <div class="stat-value">{{ $statusCounts['processing'] }}</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Selesai</div>
+            <div class="stat-value">{{ $statusCounts['completed'] }}</div>
+        </div>
+    </div>
+
+    <div class="filter-card">
+        <form action="{{ route('admin.orders.index') }}" method="GET">
+            <div class="filter-row">
+                <div>
+                    <label>Cari Pesanan</label>
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Cari kode, nama, email, atau alamat"
+                    >
+                </div>
+
+                <div>
+                    <label>Status</label>
+                    <select name="status">
+                        <option value="">Semua Status</option>
+
+                        @foreach($statusLabels as $statusKey => $statusLabel)
+                            <option value="{{ $statusKey }}" {{ request('status') === $statusKey ? 'selected' : '' }}>
+                                {{ $statusLabel }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn">
+                        Cari
+                    </button>
+
+                    <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">
+                        Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if(request('search') || request('status'))
+        <p class="muted">
+            Menampilkan hasil
+            @if(request('search'))
+                untuk kata kunci <strong>{{ request('search') }}</strong>
+            @endif
+
+            @if(request('status'))
+                dengan status <strong>{{ $statusLabels[request('status')] ?? request('status') }}</strong>
+            @endif
+        </p>
+    @endif
+
+    @if($orders->isEmpty())
         <div class="card">
-            <p>Belum ada pesanan yang masuk.</p>
+            <p>Pesanan tidak ditemukan.</p>
+            <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">
+                Lihat Semua Pesanan
+            </a>
         </div>
     @else
         <div class="table-wrapper">

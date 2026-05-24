@@ -8,28 +8,48 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    private function ensureAdmin()
+    public function index(Request $request)
     {
-        if (!auth()->check() || auth()->user()->role !== 'admin') {
-            abort(403, 'Halaman ini hanya untuk admin.');
-        }
-    }
+        $search = $request->input('search');
+        $status = $request->input('status');
 
-    public function index()
-    {
-        $this->ensureAdmin();
-
-        $orders = Order::with(['user', 'items'])
+        $orders = Order::with('user')
+            ->when($search, function ($query, $search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('order_code', 'like', '%' . $search . '%')
+                        ->orWhere('delivery_address', 'like', '%' . $search . '%')
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('email', 'like', '%' . $search . '%');
+                        });
+                });
+            })
+            ->when($status, function ($query, $status) {
+                $query->where('status', $status);
+            })
             ->latest()
             ->get();
 
-        return view('admin.orders.index', compact('orders'));
+        $statusCounts = [
+            'all' => Order::count(),
+            'pending' => Order::where('status', 'pending')->count(),
+            'confirmed' => Order::where('status', 'confirmed')->count(),
+            'processing' => Order::where('status', 'processing')->count(),
+            'delivering' => Order::where('status', 'delivering')->count(),
+            'completed' => Order::where('status', 'completed')->count(),
+            'cancelled' => Order::where('status', 'cancelled')->count(),
+        ];
+
+        return view('admin.orders.index', compact(
+            'orders',
+            'search',
+            'status',
+            'statusCounts'
+        ));
     }
 
     public function show(Order $order)
     {
-        $this->ensureAdmin();
-
         $order->load(['user', 'items']);
 
         return view('admin.orders.show', compact('order'));
@@ -37,16 +57,19 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
-        $this->ensureAdmin();
-
         $data = $request->validate([
-            'status' => ['required', 'in:pending,confirmed,processing,delivering,completed,cancelled'],
+            'status' => [
+                'required',
+                'in:pending,confirmed,processing,delivering,completed,cancelled',
+            ],
         ]);
 
         $order->update([
             'status' => $data['status'],
         ]);
 
-        return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui.');
+        return redirect()
+            ->route('admin.orders.show', $order)
+            ->with('success', 'Status pesanan berhasil diperbarui.');
     }
 }
