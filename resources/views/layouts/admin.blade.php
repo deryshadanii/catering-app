@@ -343,6 +343,36 @@
     flex-wrap: wrap;
 }
         }
+        @media print {
+    .admin-sidebar,
+    .admin-topbar,
+    .filter-card,
+    .btn {
+        display: none !important;
+    }
+
+    .admin-wrapper {
+        display: block;
+    }
+
+    .admin-content {
+        padding: 0;
+    }
+
+    body {
+        background: white;
+    }
+
+    .card,
+    .stat-card,
+    table {
+        box-shadow: none;
+    }
+
+    table {
+        font-size: 12px;
+    }
+}
     </style>
 </head>
 <body>
@@ -369,6 +399,9 @@
                 <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                     Admin Pesanan
                 </a>
+                <a href="{{ route('admin.reports.index') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+    Laporan
+</a>
 
                 <a href="{{ route('home') }}">
                     Lihat Website

@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\MenuItemController as AdminMenuItemController;
 use App\Http\Controllers\Admin\MealPackageController as AdminMealPackageController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -67,5 +68,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pesanan', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/pesanan/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::patch('/pesanan/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+        Route::get('/laporan', [AdminReportController::class, 'index'])->name('reports.index');
     });
 });
