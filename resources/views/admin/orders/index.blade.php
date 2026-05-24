@@ -1,59 +1,88 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Menu Harian - DapurMahasiswa')
+@section('title', 'Admin Pesanan')
 
 @section('content')
-    <h1>Menu Harian</h1>
-    <p class="muted">Pilih menu makan harian yang tersedia hari ini.</p>
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px;">
+        <div>
+            <h1>Admin Pesanan</h1>
+            <p class="muted">Kelola dan pantau pesanan pelanggan DapurMahasiswa.</p>
+        </div>
+    </div>
 
-    @if($menus->isEmpty())
+    @if($orders->count() === 0)
         <div class="card">
-            <p>Belum ada menu yang tersedia.</p>
+            <p>Belum ada pesanan yang masuk.</p>
         </div>
     @else
-        <div class="grid">
-            @foreach($menus as $menu)
-                <div class="card">
-                    @if($menu->image_url)
-                        <img src="{{ asset('storage/' . $menu->image_url) }}" alt="{{ $menu->name }}" style="width:100%; height:170px; object-fit:cover; border-radius:12px; margin-bottom:14px;">
-                    @endif
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kode Pesanan</th>
+                        <th>Pelanggan</th>
+                        <th>Alamat Pengantaran</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Tanggal Pesan</th>
+                        <th style="width:120px;">Aksi</th>
+                    </tr>
+                </thead>
 
-                    <h3>{{ $menu->name }}</h3>
+                <tbody>
+                    @foreach($orders as $order)
+                        <tr>
+                            <td>
+                                <strong>{{ $order->order_code }}</strong>
+                            </td>
 
-                    <p class="muted">
-                        {{ $menu->description }}
-                    </p>
+                            <td>
+                                {{ $order->user->name ?? 'User tidak ditemukan' }}
+                                <br>
+                                <span class="muted">
+                                    {{ $order->user->email ?? '-' }}
+                                </span>
+                            </td>
 
-                    <p>
-                        <strong>Kategori:</strong>
-                        {{ $menu->category ?? '-' }}
-                    </p>
+                            <td>
+                                {{ $order->delivery_address }}
+                            </td>
 
-                    @if($menu->available_date)
-                        <p>
-                            <strong>Tersedia:</strong>
-                            {{ \Carbon\Carbon::parse($menu->available_date)->format('d M Y') }}
-                        </p>
-                    @endif
+                            <td>
+                                Rp{{ number_format($order->total, 0, ',', '.') }}
+                            </td>
 
-                    <p class="price">
-                        Rp{{ number_format($menu->price, 0, ',', '.') }}
-                    </p>
+                            <td>
+                                @if($order->status === 'pending')
+                                    <span class="status" style="background:#fef3c7; color:#92400e;">Pending</span>
+                                @elseif($order->status === 'confirmed')
+                                    <span class="status" style="background:#dbeafe; color:#1e40af;">Dikonfirmasi</span>
+                                @elseif($order->status === 'processing')
+                                    <span class="status" style="background:#ede9fe; color:#5b21b6;">Diproses</span>
+                                @elseif($order->status === 'delivering')
+                                    <span class="status" style="background:#ffedd5; color:#9a3412;">Diantar</span>
+                                @elseif($order->status === 'completed')
+                                    <span class="status">Selesai</span>
+                                @elseif($order->status === 'cancelled')
+                                    <span class="status" style="background:#fee2e2; color:#991b1b;">Dibatalkan</span>
+                                @else
+                                    <span class="status">{{ ucfirst($order->status) }}</span>
+                                @endif
+                            </td>
 
-                    @auth
-                        <form action="{{ route('cart.addMenu', $menu) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn">
-                                Tambah ke Keranjang
-                            </button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" class="btn">
-                            Login untuk Pesan
-                        </a>
-                    @endauth
-                </div>
-            @endforeach
+                            <td>
+                                {{ $order->created_at->format('d M Y H:i') }}
+                            </td>
+
+                            <td>
+                                <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-secondary">
+                                    Detail
+                                </a>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     @endif
 @endsection

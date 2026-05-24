@@ -11,6 +11,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\MenuItemController as AdminMenuItemController;
 use App\Http\Controllers\Admin\MealPackageController as AdminMealPackageController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -41,7 +42,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
 
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
         Route::get('/menu', [AdminMenuItemController::class, 'index'])->name('menu-items.index');
         Route::get('/menu/create', [AdminMenuItemController::class, 'create'])->name('menu-items.create');
         Route::post('/menu', [AdminMenuItemController::class, 'store'])->name('menu-items.store');

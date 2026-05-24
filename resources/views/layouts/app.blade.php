@@ -411,10 +411,8 @@
                 <a href="{{ route('cart.index') }}">Keranjang</a>
                 <a href="{{ route('orders.index') }}">Pesanan</a>
 
-               @if(auth()->user()->role === 'admin')
-    <a href="{{ route('admin.menu-items.index') }}">Kelola Menu</a>
-    <a href="{{ route('admin.packages.index') }}">Kelola Paket</a>
-    <a href="{{ route('admin.orders.index') }}">Admin Pesanan</a>
+              @if(auth()->user()->role === 'admin')
+    <a href="{{ route('admin.dashboard') }}">Dashboard Admin</a>
 @endif
 
                 <form action="{{ route('logout') }}" method="POST" style="display:inline;">
