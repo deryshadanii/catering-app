@@ -9,6 +9,8 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\MenuItemController as AdminMenuItemController;
+use App\Http\Controllers\Admin\MealPackageController as AdminMealPackageController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -40,6 +42,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
 
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/menu', [AdminMenuItemController::class, 'index'])->name('menu-items.index');
+        Route::get('/menu/create', [AdminMenuItemController::class, 'create'])->name('menu-items.create');
+        Route::post('/menu', [AdminMenuItemController::class, 'store'])->name('menu-items.store');
+        Route::get('/menu/{menuItem}/edit', [AdminMenuItemController::class, 'edit'])->name('menu-items.edit');
+        Route::patch('/menu/{menuItem}', [AdminMenuItemController::class, 'update'])->name('menu-items.update');
+        Route::delete('/menu/{menuItem}', [AdminMenuItemController::class, 'destroy'])->name('menu-items.destroy');
+
+        Route::get('/paket', [AdminMealPackageController::class, 'index'])->name('packages.index');
+        Route::get('/paket/create', [AdminMealPackageController::class, 'create'])->name('packages.create');
+        Route::post('/paket', [AdminMealPackageController::class, 'store'])->name('packages.store');
+        Route::get('/paket/{mealPackage}/edit', [AdminMealPackageController::class, 'edit'])->name('packages.edit');
+        Route::patch('/paket/{mealPackage}', [AdminMealPackageController::class, 'update'])->name('packages.update');
+        Route::delete('/paket/{mealPackage}', [AdminMealPackageController::class, 'destroy'])->name('packages.destroy');
+
         Route::get('/pesanan', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/pesanan/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::patch('/pesanan/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');

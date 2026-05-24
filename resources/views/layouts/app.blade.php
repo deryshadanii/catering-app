@@ -226,28 +226,176 @@
             padding: 28px;
             color: #6b7280;
         }
+.menu-image {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    display: block;
+}
 
+.admin-thumb {
+    width: 90px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+}
+
+.card {
+    overflow: hidden;
+}
+
+.grid .card {
+    display: flex;
+    flex-direction: column;
+}
+
+.grid .card h3 {
+    min-height: 48px;
+}
+
+.grid .card .muted {
+    line-height: 1.5;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.action-buttons form {
+    display: inline;
+}
+   .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 18px;
+    align-items: stretch;
+}
+
+.menu-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 470px;
+}
+
+.menu-card-image {
+    width: 100%;
+    height: 180px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+.menu-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.menu-card-body {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.menu-card-title {
+    margin: 0 0 14px;
+    color: #003f22;
+    font-size: 20px;
+    line-height: 1.25;
+    min-height: 50px;
+}
+
+.menu-card-description {
+    color: #52616b;
+    line-height: 1.5;
+    min-height: 70px;
+    margin-bottom: 14px;
+}
+
+.menu-card-info {
+    margin: 8px 0;
+    line-height: 1.4;
+}
+
+.menu-card-price {
+    font-weight: bold;
+    color: #00612d;
+    font-size: 20px;
+    margin-top: auto;
+    margin-bottom: 16px;
+}
+
+.menu-card-action {
+    margin-top: 0;
+}
+
+.menu-card-action .btn {
+    width: fit-content;
+}     
         @media (max-width: 700px) {
-            .navbar {
-                flex-direction: column;
-                gap: 12px;
-                padding: 16px;
-            }
+    .navbar {
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+    }
 
-            .hero {
-                grid-template-columns: 1fr;
-                padding: 26px;
-            }
+    .hero {
+        grid-template-columns: 1fr;
+        padding: 26px;
+    }
 
-            .hero h1 {
-                font-size: 32px;
-            }
+    .hero h1 {
+        font-size: 32px;
+    }
 
-            .nav-links {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .menu-image {
+        height: 150px;
+    }
+
+    .admin-thumb {
+        width: 75px;
+        height: 60px;
+    }
+
+    table {
+        min-width: 760px;
+    }
+    .menu-grid {
+    grid-template-columns: 1fr;
+}
+
+.menu-card {
+    min-height: auto;
+}
+
+.menu-card-image {
+    height: 160px;
+}
+}
     </style>
 </head>
 <body>
@@ -263,9 +411,11 @@
                 <a href="{{ route('cart.index') }}">Keranjang</a>
                 <a href="{{ route('orders.index') }}">Pesanan</a>
 
-                @if(auth()->user()->role === 'admin')
-                    <a href="{{ route('admin.orders.index') }}">Admin</a>
-                @endif
+               @if(auth()->user()->role === 'admin')
+    <a href="{{ route('admin.menu-items.index') }}">Kelola Menu</a>
+    <a href="{{ route('admin.packages.index') }}">Kelola Paket</a>
+    <a href="{{ route('admin.orders.index') }}">Admin Pesanan</a>
+@endif
 
                 <form action="{{ route('logout') }}" method="POST" style="display:inline;">
                     @csrf

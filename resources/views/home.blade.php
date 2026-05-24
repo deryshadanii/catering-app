@@ -29,6 +29,10 @@
     <div class="grid">
         @foreach($menus as $menu)
             <div class="card">
+                @if($menu->image_url)
+                    <img src="{{ asset('storage/' . $menu->image_url) }}" alt="{{ $menu->name }}" class="menu-image">
+                @endif
+
                 <h3>{{ $menu->name }}</h3>
                 <p class="muted">{{ $menu->description }}</p>
                 <p class="price">Rp{{ number_format($menu->price, 0, ',', '.') }}</p>
@@ -50,6 +54,10 @@
     <div class="grid">
         @foreach($packages as $package)
             <div class="card">
+                @if($package->image_url)
+                    <img src="{{ asset('storage/' . $package->image_url) }}" alt="{{ $package->name }}" class="menu-image">
+                @endif
+
                 <h3>{{ $package->name }}</h3>
                 <p class="muted">{{ $package->description }}</p>
                 <p class="price">Rp{{ number_format($package->price, 0, ',', '.') }}</p>

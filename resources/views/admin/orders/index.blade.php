@@ -1,60 +1,59 @@
 @extends('layouts.app')
 
-@section('title', 'Admin Pesanan - DapurMahasiswa')
+@section('title', 'Menu Harian - DapurMahasiswa')
 
 @section('content')
-    <h1>Admin Pesanan</h1>
-    <p class="muted">Kelola status pesanan pelanggan DapurMahasiswa.</p>
+    <h1>Menu Harian</h1>
+    <p class="muted">Pilih menu makan harian yang tersedia hari ini.</p>
 
-    @if($orders->isEmpty())
+    @if($menus->isEmpty())
         <div class="card">
-            <p>Belum ada pesanan.</p>
+            <p>Belum ada menu yang tersedia.</p>
         </div>
     @else
-        <table>
-            <thead>
-                <tr>
-                    <th>Kode</th>
-                    <th>Pelanggan</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th>Ubah Status</th>
-                    <th>Detail</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($orders as $order)
-                    <tr>
-                        <td>{{ $order->order_code }}</td>
-                        <td>
-                            {{ $order->user->name }}<br>
-                            <span class="muted">{{ $order->user->email }}</span>
-                        </td>
-                        <td>Rp{{ number_format($order->total, 0, ',', '.') }}</td>
-                        <td><span class="status">{{ ucfirst($order->status) }}</span></td>
-                        <td>
-                            <form action="{{ route('admin.orders.updateStatus', $order) }}" method="POST">
-                                @csrf
-                                @method('PATCH')
+        <div class="grid">
+            @foreach($menus as $menu)
+                <div class="card">
+                    @if($menu->image_url)
+                        <img src="{{ asset('storage/' . $menu->image_url) }}" alt="{{ $menu->name }}" style="width:100%; height:170px; object-fit:cover; border-radius:12px; margin-bottom:14px;">
+                    @endif
 
-                                <select name="status">
-                                    <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="confirmed" {{ $order->status === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                                    <option value="processing" {{ $order->status === 'processing' ? 'selected' : '' }}>Processing</option>
-                                    <option value="delivering" {{ $order->status === 'delivering' ? 'selected' : '' }}>Delivering</option>
-                                    <option value="completed" {{ $order->status === 'completed' ? 'selected' : '' }}>Completed</option>
-                                    <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                </select>
+                    <h3>{{ $menu->name }}</h3>
 
-                                <button type="submit" class="btn" style="margin-top:8px;">Update</button>
-                            </form>
-                        </td>
-                        <td>
-                            <a href="{{ route('admin.orders.show', $order) }}" class="btn">Detail</a>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+                    <p class="muted">
+                        {{ $menu->description }}
+                    </p>
+
+                    <p>
+                        <strong>Kategori:</strong>
+                        {{ $menu->category ?? '-' }}
+                    </p>
+
+                    @if($menu->available_date)
+                        <p>
+                            <strong>Tersedia:</strong>
+                            {{ \Carbon\Carbon::parse($menu->available_date)->format('d M Y') }}
+                        </p>
+                    @endif
+
+                    <p class="price">
+                        Rp{{ number_format($menu->price, 0, ',', '.') }}
+                    </p>
+
+                    @auth
+                        <form action="{{ route('cart.addMenu', $menu) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn">
+                                Tambah ke Keranjang
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="btn">
+                            Login untuk Pesan
+                        </a>
+                    @endauth
+                </div>
+            @endforeach
+        </div>
     @endif
 @endsection

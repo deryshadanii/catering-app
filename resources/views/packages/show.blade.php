@@ -4,6 +4,10 @@
 
 @section('content')
     <div class="card">
+        @if($package->image_url)
+            <img src="{{ asset('storage/' . $package->image_url) }}" alt="{{ $package->name }}" style="width:100%; max-height:360px; object-fit:cover; border-radius:14px; margin-bottom:20px;">
+        @endif
+
         <h1>{{ $package->name }}</h1>
         <p class="muted">{{ $package->description }}</p>
 
