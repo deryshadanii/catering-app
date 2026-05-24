@@ -350,7 +350,33 @@
 
 .menu-card-action .btn {
     width: fit-content;
-}     
+}
+
+.filter-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 22px 0;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr auto;
+    gap: 14px;
+    align-items: end;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.filter-actions .btn {
+    white-space: nowrap;
+}
+
         @media (max-width: 700px) {
     .navbar {
         flex-direction: column;
@@ -395,6 +421,13 @@
 .menu-card-image {
     height: 160px;
 }
+.filter-row {
+    grid-template-columns: 1fr;
+}
+
+.filter-actions {
+    flex-wrap: wrap;
+}
 }
     </style>
 </head>
@@ -409,6 +442,8 @@
 
             @auth
                 <a href="{{ route('cart.index') }}">Keranjang</a>
+                <a href="{{ route('orders.index') }}">Pesanan</a>
+                <a href="{{ route('profile.show') }}">Profil</a>
                 <a href="{{ route('orders.index') }}">Pesanan</a>
 
               @if(auth()->user()->role === 'admin')

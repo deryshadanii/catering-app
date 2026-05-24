@@ -29,8 +29,14 @@
             <form action="{{ route('checkout.store') }}" method="POST">
                 @csrf
 
-                <label>Alamat Pengiriman</label>
-                <textarea name="delivery_address" required>{{ old('delivery_address', auth()->user()->address) }}</textarea>
+                <label>Alamat Pengantaran</label>
+<textarea name="delivery_address" required placeholder="Masukkan alamat kos atau lokasi pengantaran">{{ old('delivery_address', auth()->user()->address) }}</textarea>
+
+@if(!auth()->user()->address)
+    <p class="muted">
+        Kamu belum menyimpan alamat kos di profil. Isi alamat di sini atau lengkapi profil terlebih dahulu.
+    </p>
+@endif
 
                 <label>Tanggal Pengiriman</label>
                 <input type="date" name="delivery_date" value="{{ old('delivery_date') }}">

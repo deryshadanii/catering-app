@@ -6,9 +6,55 @@
     <h1>Paket Catering</h1>
     <p class="muted">Pilih paket mingguan atau bulanan sesuai kebutuhan makan anak kos.</p>
 
+    <div class="filter-card">
+        <form action="{{ route('packages.index') }}" method="GET">
+            <div class="filter-row">
+                <div>
+                    <label>Cari Paket</label>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Contoh: hemat, protein, bulanan">
+                </div>
+
+                <div>
+                    <label>Tipe Paket</label>
+                    <select name="type">
+                        <option value="">Semua Tipe</option>
+                        <option value="mingguan" {{ request('type') === 'mingguan' ? 'selected' : '' }}>Mingguan</option>
+                        <option value="bulanan" {{ request('type') === 'bulanan' ? 'selected' : '' }}>Bulanan</option>
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn">
+                        Cari
+                    </button>
+
+                    <a href="{{ route('packages.index') }}" class="btn btn-secondary">
+                        Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if(request('search') || request('type'))
+        <p class="muted">
+            Menampilkan hasil pencarian
+            @if(request('search'))
+                untuk kata kunci <strong>{{ request('search') }}</strong>
+            @endif
+
+            @if(request('type'))
+                dengan tipe <strong>{{ ucfirst(request('type')) }}</strong>
+            @endif
+        </p>
+    @endif
+
     @if($packages->isEmpty())
         <div class="card">
-            <p>Belum ada paket catering yang tersedia.</p>
+            <p>Paket catering tidak ditemukan.</p>
+            <a href="{{ route('packages.index') }}" class="btn btn-secondary">
+                Lihat Semua Paket
+            </a>
         </div>
     @else
         <div class="menu-grid">

@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\MenuItemController as AdminMenuItemController;
 use App\Http\Controllers\Admin\MealPackageController as AdminMealPackageController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\ProfileController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -35,6 +36,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/keranjang/{key}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/keranjang/{key}', [CartController::class, 'destroy'])->name('cart.destroy');
     Route::delete('/keranjang', [CartController::class, 'clear'])->name('cart.clear');
+
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');

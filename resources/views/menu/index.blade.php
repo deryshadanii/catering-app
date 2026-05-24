@@ -6,9 +6,59 @@
     <h1>Menu Harian</h1>
     <p class="muted">Pilih menu makan harian yang tersedia hari ini.</p>
 
+    <div class="filter-card">
+        <form action="{{ route('menu.index') }}" method="GET">
+            <div class="filter-row">
+                <div>
+                    <label>Cari Menu</label>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Contoh: ayam, ikan, geprek">
+                </div>
+
+                <div>
+                    <label>Kategori</label>
+                    <select name="category">
+                        <option value="">Semua Kategori</option>
+
+                        @foreach($categories as $itemCategory)
+                            <option value="{{ $itemCategory }}" {{ request('category') == $itemCategory ? 'selected' : '' }}>
+                                {{ $itemCategory }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn">
+                        Cari
+                    </button>
+
+                    <a href="{{ route('menu.index') }}" class="btn btn-secondary">
+                        Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if(request('search') || request('category'))
+        <p class="muted">
+            Menampilkan hasil pencarian
+            @if(request('search'))
+                untuk kata kunci <strong>{{ request('search') }}</strong>
+            @endif
+
+            @if(request('category'))
+                pada kategori <strong>{{ request('category') }}</strong>
+            @endif
+        </p>
+    @endif
+
     @if($menus->isEmpty())
         <div class="card">
-            <p>Belum ada menu yang tersedia.</p>
+            <p>Menu tidak ditemukan.</p>
+            <a href="{{ route('menu.index') }}" class="btn btn-secondary">
+                Lihat Semua Menu
+            </a>
         </div>
     @else
         <div class="menu-grid">
