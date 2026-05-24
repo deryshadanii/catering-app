@@ -29,8 +29,23 @@
                         <td><span class="status">{{ ucfirst($order->status) }}</span></td>
                         <td>{{ $order->created_at->format('d M Y H:i') }}</td>
                         <td>
-                            <a href="{{ route('orders.show', $order) }}" class="btn">Detail</a>
-                        </td>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <a href="{{ route('orders.show', $order) }}" class="btn btn-secondary">
+            Detail
+        </a>
+
+        @if(in_array($order->status, ['pending', 'confirmed']))
+            <form action="{{ route('orders.cancel', $order) }}" method="POST" onsubmit="return confirm('Yakin ingin membatalkan pesanan ini?')">
+                @csrf
+                @method('PATCH')
+
+                <button type="submit" class="btn btn-danger">
+                    Batal
+                </button>
+            </form>
+        @endif
+    </div>
+</td>
                     </tr>
                 @endforeach
             </tbody>

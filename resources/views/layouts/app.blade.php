@@ -463,12 +463,16 @@
 
     <main class="container">
         @if(session('success'))
-            <div class="alert-success">{{ session('success') }}</div>
-        @endif
+    <div class="alert-success">
+        {{ session('success') }}
+    </div>
+@endif
 
-        @if(session('error'))
-            <div class="alert-error">{{ session('error') }}</div>
-        @endif
+@if(session('error'))
+    <div style="background:#fee2e2; color:#991b1b; padding:14px 16px; border-radius:10px; margin-bottom:18px;">
+        {{ session('error') }}
+    </div>
+@endif
 
         @if($errors->any())
             <div class="alert-error">

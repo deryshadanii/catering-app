@@ -47,6 +47,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/pesanan', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/pesanan/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::patch('/pesanan/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
 
     Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -70,5 +71,6 @@ Route::middleware('auth')->group(function () {
         Route::patch('/pesanan/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
         Route::get('/laporan', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::get('/laporan/export', [AdminReportController::class, 'exportCsv'])->name('reports.export');
     });
 });

@@ -87,17 +87,23 @@
     </div>
 
     <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px;">
-        <div>
-            <h2>Detail Laporan</h2>
-            <p class="muted">
-                Data pesanan sesuai filter yang dipilih.
-            </p>
-        </div>
+    <div>
+        <h2>Detail Laporan</h2>
+        <p class="muted">
+            Data pesanan sesuai filter yang dipilih.
+        </p>
+    </div>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <a href="{{ route('admin.reports.export', request()->query()) }}" class="btn">
+            Export CSV
+        </a>
 
         <button onclick="window.print()" class="btn btn-secondary">
             Cetak Laporan
         </button>
     </div>
+</div>
 
     @if($orders->isEmpty())
         <div class="card">

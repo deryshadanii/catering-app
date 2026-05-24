@@ -8,9 +8,9 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    public function index(Request $request)
+    private function statusLabels()
     {
-        $statusLabels = [
+        return [
             'all' => 'Semua Status',
             'pending' => 'Pending',
             'confirmed' => 'Dikonfirmasi',
@@ -19,6 +19,11 @@ class ReportController extends Controller
             'completed' => 'Selesai',
             'cancelled' => 'Dibatalkan',
         ];
+    }
+
+    private function filteredOrdersQuery(Request $request)
+    {
+        $statusLabels = $this->statusLabels();
 
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
@@ -28,7 +33,7 @@ class ReportController extends Controller
             $status = 'completed';
         }
 
-        $query = Order::with('user')
+        return Order::with('user')
             ->when($dateFrom, function ($query) use ($dateFrom) {
                 $query->whereDate('created_at', '>=', $dateFrom);
             })
@@ -38,6 +43,21 @@ class ReportController extends Controller
             ->when($status !== 'all', function ($query) use ($status) {
                 $query->where('status', $status);
             });
+    }
+
+    public function index(Request $request)
+    {
+        $statusLabels = $this->statusLabels();
+
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        $status = $request->input('status', 'completed');
+
+        if (!array_key_exists($status, $statusLabels)) {
+            $status = 'completed';
+        }
+
+        $query = $this->filteredOrdersQuery($request);
 
         $orders = (clone $query)
             ->latest()
@@ -69,5 +89,52 @@ class ReportController extends Controller
             'totalRevenue',
             'completedRevenue'
         ));
+    }
+
+    public function exportCsv(Request $request)
+    {
+        $orders = $this->filteredOrdersQuery($request)
+            ->latest()
+            ->get();
+
+        $fileName = 'laporan-dapurmahasiswa-' . now()->format('Y-m-d-H-i-s') . '.csv';
+
+        return response()->streamDownload(function () use ($orders) {
+            echo "\xEF\xBB\xBF";
+
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'Kode Pesanan',
+                'Nama Pelanggan',
+                'Email Pelanggan',
+                'Status',
+                'Alamat Pengantaran',
+                'Metode Pembayaran',
+                'Subtotal',
+                'Ongkir',
+                'Total',
+                'Tanggal Pesan',
+            ]);
+
+            foreach ($orders as $order) {
+                fputcsv($handle, [
+                    $order->order_code,
+                    $order->user->name ?? 'User tidak ditemukan',
+                    $order->user->email ?? '-',
+                    ucfirst($order->status),
+                    $order->delivery_address,
+                    strtoupper(str_replace('_', ' ', $order->payment_method)),
+                    $order->subtotal,
+                    $order->delivery_fee,
+                    $order->total,
+                    $order->created_at->format('d-m-Y H:i'),
+                ]);
+            }
+
+            fclose($handle);
+        }, $fileName, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 }
