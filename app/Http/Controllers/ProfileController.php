@@ -9,12 +9,21 @@ class ProfileController extends Controller
 {
     public function show()
     {
-        return view('profile.show');
-    }
+        $user = auth()->user();
 
-    public function edit()
-    {
-        return view('profile.edit');
+        $orders = $user->orders()
+            ->latest()
+            ->limit(3)
+            ->get();
+
+        $orderStats = [
+            'total' => $user->orders()->count(),
+            'pending' => $user->orders()->where('status', 'pending')->count(),
+            'processing' => $user->orders()->whereIn('status', ['confirmed', 'processing', 'delivering'])->count(),
+            'completed' => $user->orders()->where('status', 'completed')->count(),
+        ];
+
+        return view('profile.show', compact('user', 'orders', 'orderStats'));
     }
 
     public function update(Request $request)
@@ -27,7 +36,7 @@ class ProfileController extends Controller
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('users')->ignore($user->id),
+                Rule::unique('users', 'email')->ignore($user->id),
             ],
             'phone' => ['nullable', 'string', 'max:30'],
             'address' => ['nullable', 'string', 'max:1000'],

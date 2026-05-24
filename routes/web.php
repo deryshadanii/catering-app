@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/menu', [MenuItemController::class, 'index'])->name('menu.index');
@@ -32,13 +33,16 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
     Route::get('/keranjang', [CartController::class, 'index'])->name('cart.index');
+
     Route::post('/keranjang/menu/{menuItem}', [CartController::class, 'addMenu'])->name('cart.addMenu');
-    Route::post('/keranjang/paket/{package}', [CartController::class, 'addPackage'])->name('cart.addPackage');
-    Route::patch('/keranjang/{key}', [CartController::class, 'update'])->name('cart.update');
-    Route::delete('/keranjang/{key}', [CartController::class, 'destroy'])->name('cart.destroy');
+    Route::post('/keranjang/paket/{mealPackage}', [CartController::class, 'addPackage'])->name('cart.addPackage');
+
+    Route::patch('/keranjang/{cartKey}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/keranjang/{cartKey}', [CartController::class, 'remove'])->name('cart.remove');
     Route::delete('/keranjang', [CartController::class, 'clear'])->name('cart.clear');
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
@@ -69,6 +73,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/pesanan', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/pesanan/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::patch('/pesanan/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+        Route::get('/pesanan', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::get('/pesanan/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+
+        Route::patch('/pesanan/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
+        Route::patch('/pesanan/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+        Route::delete('/pesanan/{order}', [AdminOrderController::class, 'destroy'])->name('orders.destroy');
 
         Route::get('/laporan', [AdminReportController::class, 'index'])->name('reports.index');
         Route::get('/laporan/export', [AdminReportController::class, 'exportCsv'])->name('reports.export');

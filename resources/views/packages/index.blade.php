@@ -3,23 +3,37 @@
 @section('title', 'Paket Catering - DapurMahasiswa')
 
 @section('content')
-    <h1>Paket Catering</h1>
-    <p class="muted">Pilih paket mingguan atau bulanan sesuai kebutuhan makan anak kos.</p>
+    <div class="page-header">
+        <h1>Paket Catering</h1>
+        <p>
+            Pilih paket catering mingguan atau bulanan sesuai kebutuhan makan anak kos.
+            Paket ini cocok untuk mahasiswa yang ingin makan lebih teratur tanpa harus pesan satu per satu setiap hari.
+        </p>
+    </div>
 
     <div class="filter-card">
         <form action="{{ route('packages.index') }}" method="GET">
             <div class="filter-row">
                 <div>
                     <label>Cari Paket</label>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Contoh: hemat, protein, bulanan">
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Contoh: hemat, protein, bulanan"
+                    >
                 </div>
 
                 <div>
                     <label>Tipe Paket</label>
                     <select name="type">
                         <option value="">Semua Tipe</option>
-                        <option value="mingguan" {{ request('type') === 'mingguan' ? 'selected' : '' }}>Mingguan</option>
-                        <option value="bulanan" {{ request('type') === 'bulanan' ? 'selected' : '' }}>Bulanan</option>
+                        <option value="mingguan" {{ request('type') === 'mingguan' ? 'selected' : '' }}>
+                            Mingguan
+                        </option>
+                        <option value="bulanan" {{ request('type') === 'bulanan' ? 'selected' : '' }}>
+                            Bulanan
+                        </option>
                     </select>
                 </div>
 
@@ -37,8 +51,9 @@
     </div>
 
     @if(request('search') || request('type'))
-        <p class="muted">
-            Menampilkan hasil pencarian
+        <p class="muted" style="margin-bottom:18px;">
+            Menampilkan hasil
+
             @if(request('search'))
                 untuk kata kunci <strong>{{ request('search') }}</strong>
             @endif
@@ -50,8 +65,12 @@
     @endif
 
     @if($packages->isEmpty())
-        <div class="card">
-            <p>Paket catering tidak ditemukan.</p>
+        <div class="card empty-state">
+            <h3>Paket tidak ditemukan</h3>
+            <p class="muted">
+                Coba gunakan kata kunci atau tipe paket lain.
+            </p>
+
             <a href="{{ route('packages.index') }}" class="btn btn-secondary">
                 Lihat Semua Paket
             </a>
@@ -69,7 +88,9 @@
                     </div>
 
                     <div class="menu-card-body">
-                        <h3 class="menu-card-title">{{ $package->name }}</h3>
+                        <h3 class="menu-card-title">
+                            {{ $package->name }}
+                        </h3>
 
                         <p class="menu-card-description">
                             {{ $package->description ?? 'Tidak ada deskripsi paket.' }}
@@ -80,13 +101,20 @@
                             {{ ucfirst($package->type) }}
                         </p>
 
+                        @if($package->benefits)
+                            <p class="menu-card-info">
+                                <strong>Keunggulan:</strong>
+                                {{ \Illuminate\Support\Str::limit($package->benefits, 80) }}
+                            </p>
+                        @endif
+
                         <p class="menu-card-price">
                             Rp{{ number_format($package->price, 0, ',', '.') }}
                         </p>
 
                         <div class="menu-card-action">
                             <a href="{{ route('packages.show', $package) }}" class="btn">
-                                Lihat Detail
+                                Lihat Detail Paket
                             </a>
                         </div>
                     </div>

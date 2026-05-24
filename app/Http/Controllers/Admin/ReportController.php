@@ -5,130 +5,128 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
-    private function statusLabels()
+    private function ensureAdmin()
     {
-        return [
-            'all' => 'Semua Status',
-            'pending' => 'Pending',
-            'confirmed' => 'Dikonfirmasi',
-            'processing' => 'Diproses',
-            'delivering' => 'Diantar',
-            'completed' => 'Selesai',
-            'cancelled' => 'Dibatalkan',
-        ];
+        if (!auth()->check() || auth()->user()->role !== 'admin') {
+            abort(403, 'Halaman ini hanya untuk admin.');
+        }
     }
 
-    private function filteredOrdersQuery(Request $request)
+    private function filteredOrders(Request $request)
     {
-        $statusLabels = $this->statusLabels();
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $status = $request->input('status');
+        $paymentMethod = $request->input('payment_method');
 
-        $dateFrom = $request->input('date_from');
-        $dateTo = $request->input('date_to');
-        $status = $request->input('status', 'completed');
-
-        if (!array_key_exists($status, $statusLabels)) {
-            $status = 'completed';
-        }
-
-        return Order::with('user')
-            ->when($dateFrom, function ($query) use ($dateFrom) {
-                $query->whereDate('created_at', '>=', $dateFrom);
+        return Order::with(['user', 'items'])
+            ->when($startDate, function ($query, $startDate) {
+                $query->whereDate('created_at', '>=', $startDate);
             })
-            ->when($dateTo, function ($query) use ($dateTo) {
-                $query->whereDate('created_at', '<=', $dateTo);
+            ->when($endDate, function ($query, $endDate) {
+                $query->whereDate('created_at', '<=', $endDate);
             })
-            ->when($status !== 'all', function ($query) use ($status) {
+            ->when($status, function ($query, $status) {
                 $query->where('status', $status);
+            })
+            ->when($paymentMethod, function ($query, $paymentMethod) {
+                $query->where('payment_method', $paymentMethod);
             });
     }
 
     public function index(Request $request)
     {
-        $statusLabels = $this->statusLabels();
+        $this->ensureAdmin();
 
-        $dateFrom = $request->input('date_from');
-        $dateTo = $request->input('date_to');
-        $status = $request->input('status', 'completed');
+        $ordersQuery = $this->filteredOrders($request);
 
-        if (!array_key_exists($status, $statusLabels)) {
-            $status = 'completed';
-        }
+        $ordersForSummary = (clone $ordersQuery)->get();
 
-        $query = $this->filteredOrdersQuery($request);
-
-        $orders = (clone $query)
+        $orders = (clone $ordersQuery)
             ->latest()
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
-        $totalOrders = (clone $query)->count();
-        $totalSubtotal = (clone $query)->sum('subtotal');
-        $totalDeliveryFee = (clone $query)->sum('delivery_fee');
-        $totalRevenue = (clone $query)->sum('total');
+        $summary = [
+            'total_orders' => $ordersForSummary->count(),
+            'completed_orders' => $ordersForSummary->where('status', 'completed')->count(),
+            'pending_orders' => $ordersForSummary->where('status', 'pending')->count(),
+            'cancelled_orders' => $ordersForSummary->where('status', 'cancelled')->count(),
+            'total_revenue' => $ordersForSummary->where('status', 'completed')->sum('total'),
+            'gross_total' => $ordersForSummary->sum('total'),
+            'cod_orders' => $ordersForSummary->where('payment_method', 'cod')->count(),
+            'qris_orders' => $ordersForSummary->where('payment_method', 'qris')->count(),
+        ];
 
-        $completedRevenue = Order::where('status', 'completed')
-            ->when($dateFrom, function ($query) use ($dateFrom) {
-                $query->whereDate('created_at', '>=', $dateFrom);
+        $topItems = $ordersForSummary
+            ->flatMap(function ($order) {
+                return $order->items;
             })
-            ->when($dateTo, function ($query) use ($dateTo) {
-                $query->whereDate('created_at', '<=', $dateTo);
+            ->groupBy('item_name')
+            ->map(function ($items, $name) {
+                return [
+                    'name' => $name,
+                    'quantity' => $items->sum('quantity'),
+                    'total' => $items->sum('total'),
+                ];
             })
-            ->sum('total');
+            ->sortByDesc('quantity')
+            ->take(5)
+            ->values();
 
         return view('admin.reports.index', compact(
             'orders',
-            'statusLabels',
-            'dateFrom',
-            'dateTo',
-            'status',
-            'totalOrders',
-            'totalSubtotal',
-            'totalDeliveryFee',
-            'totalRevenue',
-            'completedRevenue'
+            'summary',
+            'topItems'
         ));
     }
 
-    public function exportCsv(Request $request)
+    public function exportCsv(Request $request): StreamedResponse
     {
-        $orders = $this->filteredOrdersQuery($request)
+        $this->ensureAdmin();
+
+        $orders = $this->filteredOrders($request)
             ->latest()
             ->get();
 
-        $fileName = 'laporan-dapurmahasiswa-' . now()->format('Y-m-d-H-i-s') . '.csv';
+        $fileName = 'laporan-dapurmahasiswa-' . now()->format('Y-m-d-His') . '.csv';
 
         return response()->streamDownload(function () use ($orders) {
-            echo "\xEF\xBB\xBF";
-
             $handle = fopen('php://output', 'w');
+
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
             fputcsv($handle, [
                 'Kode Pesanan',
+                'Tanggal Pesanan',
                 'Nama Pelanggan',
-                'Email Pelanggan',
-                'Status',
-                'Alamat Pengantaran',
+                'Email',
                 'Metode Pembayaran',
+                'Status',
                 'Subtotal',
                 'Ongkir',
                 'Total',
-                'Tanggal Pesan',
+                'Alamat Pengantaran',
+                'Tanggal Pengantaran',
             ]);
 
             foreach ($orders as $order) {
                 fputcsv($handle, [
                     $order->order_code,
-                    $order->user->name ?? 'User tidak ditemukan',
+                    optional($order->created_at)->format('d-m-Y H:i'),
+                    $order->user->name ?? '-',
                     $order->user->email ?? '-',
-                    ucfirst($order->status),
-                    $order->delivery_address,
-                    strtoupper(str_replace('_', ' ', $order->payment_method)),
+                    strtoupper($order->payment_method ?? '-'),
+                    ucfirst($order->status ?? '-'),
                     $order->subtotal,
                     $order->delivery_fee,
                     $order->total,
-                    $order->created_at->format('d-m-Y H:i'),
+                    $order->delivery_address,
+                    $order->delivery_date,
                 ]);
             }
 

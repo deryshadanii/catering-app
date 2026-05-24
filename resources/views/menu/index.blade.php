@@ -3,15 +3,25 @@
 @section('title', 'Menu Harian - DapurMahasiswa')
 
 @section('content')
-    <h1>Menu Harian</h1>
-    <p class="muted">Pilih menu makan harian yang tersedia hari ini.</p>
+    <div class="page-header">
+        <h1>Menu Harian</h1>
+        <p>
+            Pilih menu makan harian yang tersedia untuk anak kos sekitar UINSU Medan.
+            Gunakan pencarian atau kategori agar lebih mudah menemukan menu yang kamu suka.
+        </p>
+    </div>
 
     <div class="filter-card">
         <form action="{{ route('menu.index') }}" method="GET">
             <div class="filter-row">
                 <div>
                     <label>Cari Menu</label>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Contoh: ayam, ikan, geprek">
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Contoh: ayam, ikan, geprek"
+                    >
                 </div>
 
                 <div>
@@ -41,8 +51,8 @@
     </div>
 
     @if(request('search') || request('category'))
-        <p class="muted">
-            Menampilkan hasil pencarian
+        <p class="muted" style="margin-bottom:18px;">
+            Menampilkan hasil
             @if(request('search'))
                 untuk kata kunci <strong>{{ request('search') }}</strong>
             @endif
@@ -54,8 +64,12 @@
     @endif
 
     @if($menus->isEmpty())
-        <div class="card">
-            <p>Menu tidak ditemukan.</p>
+        <div class="card empty-state">
+            <h3>Menu tidak ditemukan</h3>
+            <p class="muted">
+                Coba gunakan kata kunci atau kategori lain.
+            </p>
+
             <a href="{{ route('menu.index') }}" class="btn btn-secondary">
                 Lihat Semua Menu
             </a>
@@ -73,7 +87,9 @@
                     </div>
 
                     <div class="menu-card-body">
-                        <h3 class="menu-card-title">{{ $menu->name }}</h3>
+                        <h3 class="menu-card-title">
+                            {{ $menu->name }}
+                        </h3>
 
                         <p class="menu-card-description">
                             {{ $menu->description ?? 'Tidak ada deskripsi menu.' }}
@@ -101,6 +117,7 @@
                             @auth
                                 <form action="{{ route('cart.addMenu', $menu) }}" method="POST">
                                     @csrf
+
                                     <button type="submit" class="btn">
                                         Tambah ke Keranjang
                                     </button>
